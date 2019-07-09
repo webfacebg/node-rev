@@ -12,6 +12,7 @@ export default function(options) {
   //use assert to require filesPath, outputDir
   assert(options.files, 'files property is required')
   const filesPath = options.files
+  const baseStr = options.baseStr || ''
   const outputDir = options.outputDir || __dirname
   const outputDest = path.resolve(outputDir)
   const file = options.file
@@ -47,6 +48,8 @@ export default function(options) {
       while(dirParts.join('/') !== baseDir) {
         fileDirParts.unshift(dirParts.pop())
       }
+      fileDirParts.unshift(dirParts.pop())
+      fileDirParts = fileDirParts.filter( ( el ) => !baseStr.split('/').includes( el ) )
       let fileDir = fileDirParts.join('/')
       const buffer = fs.readFileSync(file)
       if (hash) {

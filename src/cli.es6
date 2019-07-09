@@ -3,15 +3,16 @@ import yargs from 'yargs'
 import nodeRev from './index'
 
 const argv = yargs
-  .usage('Usage: $0 [glob] -o [dir]')
+  .usage('Usage: $0 [glob] -b [base] -o [dir]')
   .demand(['o'])
   .demand(1)
   .argv
 
-const manifest = nodeRev({
+ const manifest = nodeRev({
   files: argv._[0],
-  outputDir: argv.o,
-  file: argv.file,
+  baseStr: argv.b,
+ outputDir: argv.o,
+ file: argv.file,
   hash: argv.hash
 })
 
