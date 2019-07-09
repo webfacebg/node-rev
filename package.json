@@ -1,5 +1,5 @@
 {
-  "name": "node-rev",
+  "name": "@webfacebg/node-rev",
   "version": "1.2.0",
   "description": "cli and node api version of gulp/grunt-rev, uses rev-path, rev-hash to generate a json of assets",
   "keywords": "rev, rev-path, rev-hash, assets, manifest",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kellyrmilligan/node-rev.git"
+    "url": "https://github.com/webfacebg/node-rev.git"
   },
   "scripts": {
     "test": "npm-run-all clean lint babel babel-test lab",
@@ -26,7 +26,7 @@
     "build": "npm-run-all clean lint babel",
     "dev": "npm-run-all clean --parallel watch-lint watch-babel"
   },
-  "author": "Kelly Milligan",
+  "author": "Kelly Milligan, Daniel Bashev",
   "license": "MIT",
   "dependencies": {
     "commondir": "^1.0.1",
