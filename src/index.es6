@@ -32,6 +32,8 @@ export default function(options) {
   filesPathParts.forEach(function(filePathPart) {
     files = files.concat(files, glob.sync(path.resolve(filePathPart), {}));
   });
+  // Uniquify files
+  files = Array.from(new Set(files));
 
   let baseDir;
   if (files && files.length === 1) {
@@ -57,18 +59,18 @@ export default function(options) {
         const revdPath = revPath(path.join(fileDir, filename), h);
         manifest[path.join(fileDir, filename)] = revdPath;
         fs.ensureFileSync(path.join(outputDest, revdPath));
-        fs.writeFileSync(path.join(outputDest, revdPath), buffer);
+        fs.copyFileSync(file, path.join(outputDest, revdPath));
       } else {
         manifest[path.join(fileDir, filename)] = path.join(fileDir, filename);
         fs.ensureFileSync(path.join(outputDest, path.join(fileDir, filename)));
-        fs.writeFileSync(path.join(outputDest, path.join(fileDir, filename)), buffer);
+        fs.copyFileSync(file, path.join(outputDest, fileDir, filename));
       }
     });
 
     const dependencyMap = {};
     if (hash) {
       Object.keys(manifest).forEach(f => {
-        if (f.match(/\.(css|js|html)/i)) {
+        if (f.match(/\.(css|js|html)$/i)) {
           const content = fs.readFileSync(path.resolve(path.join(outputDest, manifest[f]))).toString();
           Object.keys(manifest).forEach(k => {
             if (content.match(k)) {
@@ -85,17 +87,19 @@ export default function(options) {
       // Check if target is a dependent
       if (dependencyMap[target]) {
         for (var dependency in dependencyMap[target]) {
-          // Target to be recalculated
-          if (typeof timesInRecursion[dependency + "==" + target] === "undefined") {
-            timesInRecursion[dependency + "==" + target] = 0;
-          }
-          // Check if dependecy loop
-          if (timesInRecursion[dependency + "==" + target] < 100) {
-            timesInRecursion[dependency + "==" + target] = parseInt(timesInRecursion[dependency + "==" + target]) + 1;
-            replaceStringsFor(dependency);
-          } else {
-            console.log("Too deep recursion in dependencies for: [ " + dependency + " ] included in: [ " + target + " ]");
-            delete(dependencyMap[target][dependency]);
+          if (dependency.match(/\.(css|js|html)$/i)) {
+            // Target to be recalculated
+            if (typeof timesInRecursion[dependency + "==" + target] === "undefined") {
+              timesInRecursion[dependency + "==" + target] = 0;
+            }
+            // Check if dependecy loop
+            if (timesInRecursion[dependency + "==" + target] < 100) {
+              timesInRecursion[dependency + "==" + target] = parseInt(timesInRecursion[dependency + "==" + target]) + 1;
+              replaceStringsFor(dependency);
+            } else {
+              console.log("Too deep recursion in dependencies for: [ " + dependency + " ] included in: [ " + target + " ]");
+              delete(dependencyMap[target][dependency]);
+            }
           }
         }
       }
@@ -105,10 +109,11 @@ export default function(options) {
         if (f === target) {
           let contents = fs.readFileSync(path.resolve(path.join(outputDest, manifest[f]))).toString();
           for (let depToReplace in dependencyMap[f]) {
-            contents = contents.replace(new RegExp(depToReplace), manifest[depToReplace]);
+            contents = contents.replace(new RegExp(depToReplace, 'g'), manifest[depToReplace]);
           }
           const h = revHash(Buffer.from(contents));
           const newPath = revPath(f, h);
+
           fs.writeFileSync(path.resolve(path.join(outputDest, newPath)), contents);
           manifest[f] = newPath;
           break;
