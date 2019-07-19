@@ -104,7 +104,8 @@ export default function(options) {
         }
       }
       // // First find the file in the array
-      for(let f in manifest) {
+      const manifestFiles = Object.keys(manifest).sort((a, b) => b.length - a.length );
+      for(let f of manifestFiles) {
         // File ref found!
         if (f === target) {
           let contents = fs.readFileSync(path.resolve(path.join(outputDest, manifest[f]))).toString();
