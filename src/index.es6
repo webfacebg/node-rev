@@ -104,12 +104,12 @@ export default function(options) {
         }
       }
       // // First find the file in the array
-      const manifestFiles = Object.keys(manifest).sort((a, b) => b.length - a.length );
-      for(let f of manifestFiles) {
+      for(let f in manifest) {
         // File ref found!
         if (f === target) {
           let contents = fs.readFileSync(path.resolve(path.join(outputDest, manifest[f]))).toString();
-          for (let depToReplace in dependencyMap[f]) {
+          const dependencies = Object.keys(dependencyMap[f]).sort((a, b) => b.length - a.length );
+          for (let depToReplace of dependencies) {
             contents = contents.replace(new RegExp(depToReplace, 'g'), manifest[depToReplace]);
           }
           const h = revHash(Buffer.from(contents));
